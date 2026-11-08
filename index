@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Daily Planer</title>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0f766e"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Daily Planer"><link rel="apple-touch-icon" href="icon-192.png"><link rel="icon" href="icon-192.png">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<style>
+:root{--bg:#f6f5f1;--card:#fff;--tx:#1f2328;--mut:#6b7078;--ac:#0f766e;--acs:#d9f0ec;--bd:#e3e1da;--ok:#15803d;--warn:#b45309;--bad:#b91c1c;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15171a;--card:#1f2226;--tx:#ececec;--mut:#9aa0a8;--ac:#2dd4bf;--acs:#12332f;--bd:#32363c;--ok:#4ade80;--warn:#fbbf24;--bad:#f87171;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#15171a;--card:#1f2226;--tx:#ececec;--mut:#9aa0a8;--ac:#2dd4bf;--acs:#12332f;--bd:#32363c;--ok:#4ade80;--warn:#fbbf24;--bad:#f87171;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:Vazirmatn,Tahoma,"Segoe UI",system-ui,sans-serif;font-size:15px;line-height:1.7;padding-bottom:80px}
+#app{max-width:640px;margin:0 auto;padding:12px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px;margin-bottom:12px}
+h2{font-size:16px;margin:0 0 8px}
+h3{font-size:14px;margin:0 0 6px;color:var(--mut);font-weight:600}
+input,select,textarea,button{font:inherit;color:var(--tx)}
+input,select,textarea{width:100%;background:var(--bg);border:1px solid var(--bd);border-radius:10px;padding:8px 10px;min-height:40px}
+button{background:var(--acs);border:1px solid var(--bd);border-radius:10px;padding:6px 12px;cursor:pointer;min-height:36px}
+button.p{background:var(--ac);color:var(--bg);border-color:var(--ac);font-weight:600}
+button.g{background:none;border:none;color:var(--mut);padding:4px 8px}
+.row{display:flex;gap:8px;align-items:center}.row>*{flex:1}.row>.f0{flex:0 0 auto}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+label{font-size:12px;color:var(--mut);display:block}
+.nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.nav b{font-size:17px}
+.task{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-top:1px solid var(--bd)}
+.task:first-of-type{border-top:none}
+.task input[type=checkbox]{width:22px;height:22px;min-height:0;margin-top:4px;flex:0 0 auto;accent-color:var(--ac)}
+.tb{flex:1;min-width:0}.done .tt{text-decoration:line-through;color:var(--mut)}
+.tt{font-weight:600}
+.meta{font-size:12px;color:var(--mut)}
+.badge{display:inline-block;font-size:11px;border-radius:8px;padding:0 7px;background:var(--acs);margin-inline-end:4px}
+.w4,.w5{background:var(--bad);color:#fff}.w3{background:var(--warn);color:#fff}
+.tech{background:var(--bg);border-radius:10px;padding:8px;margin-top:6px;font-size:13px}
+.slot{display:flex;gap:10px;padding:6px 0;border-top:1px solid var(--bd);font-size:14px}
+.slot:first-of-type{border-top:none}
+.slot .tm{flex:0 0 96px;color:var(--mut);font-size:12px;padding-top:2px}
+.free{color:var(--ok)}.fixed{color:var(--tx)}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
+.cal .h{font-size:11px;color:var(--mut)}
+.cal button{min-height:44px;padding:2px;position:relative;background:var(--bg)}
+.cal button.t{border-color:var(--ac);font-weight:700}
+.cal button.s{background:var(--ac);color:var(--bg)}
+.cal i{position:absolute;bottom:3px;left:50%;width:6px;height:6px;margin-left:-3px;border-radius:50%;background:var(--ok)}
+.bar{height:8px;border-radius:5px;background:var(--bd);overflow:hidden;margin:2px 0 6px}.bar>div{height:100%;background:var(--ac)}
+.dots span{display:inline-block;width:12px;height:12px;border-radius:4px;background:var(--bd);margin-inline-end:3px}.dots span.on{background:var(--ok)}
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:var(--card);border-top:1px solid var(--bd);padding-bottom:env(safe-area-inset-bottom,0px);z-index:5}
+nav button{flex:1;border:none;border-radius:0;background:none;min-height:56px;color:var(--mut)}
+nav button.on{color:var(--ac);font-weight:700}
+.note{font-size:12px;color:var(--mut)}
+.sug{background:var(--acs);border-radius:10px;padding:8px;margin-top:6px;font-size:13px}
+.stats{display:flex;gap:8px}.stats div{flex:1;background:var(--bg);border-radius:12px;padding:8px;text-align:center}.stats b{display:block;font-size:18px}
+.hero{background:linear-gradient(135deg,var(--acs),var(--card))}
+.item{display:flex;gap:8px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--bd)}.item:last-child{border:0}
+.tmx{flex:0 0 84px;font-size:12px;color:var(--mut);direction:ltr;text-align:right;padding-top:3px}
+.ib{width:5px;align-self:stretch;border-radius:4px;flex:none;background:var(--mut)}.ib.w5{background:var(--bad)}.ib.w4{background:var(--warn)}.ib.w3{background:var(--ac)}.ib.w2{background:#4b6fa5}
+.gr{flex:1;min-width:0}
+.fxd{background:var(--bg);border-radius:10px;padding:6px 10px;flex:1;font-size:13px}
+.fre{border:1.5px dashed var(--bd);border-radius:10px;padding:6px 10px;color:var(--mut);font-size:13px;flex:1}
+details{font-size:13px;margin-top:4px}summary{color:var(--ac);cursor:pointer}
+.brow{display:grid;grid-template-columns:1fr 100px 100px 30px;gap:6px;margin-bottom:6px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<nav id="nav"></nav>
+<script>
+const K='daily_planner_v1';
+const FA='۰۱۲۳۴۵۶۷۸۹',fa=n=>String(n).replace(/\d/g,d=>FA[d]);
+const MN=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+const WD=['شنبه','یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه'];
+const TOP=['مطالعه','کارهای روزمره','پرداخت‌ها','حسابرسی','تفریح','شغل','خودشناسی','ورزش'];
+const NEEDS=['دلبستگی ایمن و پذیرش','خودمختاری و شایستگی','ابراز آزادانه نیازها و هیجان‌ها','خودانگیختگی و بازی','محدودیت‌های واقع‌بینانه و خودکنترلی'];
+const W=['','خیلی کم','کم','متوسط','مهم','حیاتی'];
+const TQ={
+'مطالعه':['فقط کتاب را باز کن و یک پاراگراف بخوان.','پومودورو: ۲۵ دقیقه تمرکز، ۵ دقیقه استراحت؛ آخر هر دور یک جمله خلاصه بنویس.'],
+'کارهای روزمره':['ساده‌ترین بخش را همین الان شروع کن.','کارهای مشابه را پشت هم و یک‌جا انجام بده.'],
+'پرداخت‌ها':['برنامه یا سایت پرداخت را باز کن و اولین مورد را انتخاب کن.','همه موارد را در یک جلسه کوتاه و با چک‌لیست تمام کن.'],
+'حسابرسی':['فایل یا دفتر را باز کن و فقط ۵ ردیف اول را بررسی کن.','بلوک ۳۰ دقیقه‌ای بدون پیام و نوتیفیکیشن؛ مغایرت‌ها را همان لحظه علامت بزن.'],
+'تفریح':['زمان شروع و پایان مشخص کن تا بدون عذاب وجدان لذت ببری.','بعد از تمام شدن، یک جمله بنویس چه حسی داشتی.'],
+'شغل':['قانون ۲ دقیقه: اولین قدم فیزیکی کار را انجام بده.','کار سخت‌تر را اول بزن (قورباغه)؛ هر ۵۰ دقیقه ۱۰ دقیقه استراحت.'],
+'خودشناسی':['۵ دقیقه بنویس: الان چه حسی دارم و چه نیازی پشت آن است؟','هر نوشته را با «به نظر می‌رسد نیاز من …» تمام کن.'],
+'ورزش':['لباس ورزشی را بپوش؛ همین کافی است.','با ۵ دقیقه شروع کن؛ اگر حال داشتی ادامه بده، در غیر این صورت همان را «انجام‌شده» حساب کن.']};
+// تقویم جلالی
+function d2j(gy,gm,gd){const g=[0,31,59,90,120,151,181,212,243,273,304,334],y2=gm>2?gy+1:gy;let days=355666+365*gy+Math.floor((y2+3)/4)-Math.floor((y2+99)/100)+Math.floor((y2+399)/400)+gd+g[gm-1];let jy=-1595+33*Math.floor(days/12053);days%=12053;jy+=4*Math.floor(days/1461);days%=1461;if(days>365){jy+=Math.floor((days-1)/365);days=(days-1)%365}const jm=days<186?1+Math.floor(days/31):7+Math.floor((days-186)/30),jd=1+(days<186?days%31:(days-186)%30);return[jy,jm,jd]}
+function j2g(jy,jm,jd){jy+=1595;let days=-355668+365*jy+Math.floor(jy/33)*8+Math.floor((jy%33+3)/4)+jd+(jm<7?(jm-1)*31:(jm-7)*30+186);let gy=400*Math.floor(days/146097);days%=146097;if(days>36524){gy+=100*Math.floor(--days/36524);days%=36524;if(days>=365)days++}gy+=4*Math.floor(days/1461);days%=1461;if(days>365){gy+=Math.floor((days-1)/365);days=(days-1)%365}let gd=days+1;const s=[0,31,(gy%4==0&&gy%100!=0)||gy%400==0?29:28,31,30,31,30,31,31,30,31,30,31];let gm;for(gm=0;gm<13&&gd>s[gm];gm++)gd-=s[gm];return[gy,gm,gd]}
+function jLen(jy,jm){if(jm<=6)return 31;if(jm<=11)return 30;const g=j2g(jy,12,30),b=d2j(g[0],g[1],g[2]);return b[0]==jy&&b[1]==12&&b[2]==30?30:29}
+const key=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const jdate=d=>d2j(d.getFullYear(),d.getMonth()+1,d.getDate());
+const jToDate=(y,m,d)=>{const g=j2g(y,m,d);return new Date(g[0],g[1]-1,g[2],12)};
+const wdOf=d=>(d.getDay()+1)%7;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const tm=s=>{const a=s.split(':');return +a[0]*60+ +a[1]},ts=m=>fa(String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0'));
+// وضعیت
+let S={};try{S=JSON.parse(localStorage.getItem(K))||{}}catch(e){}
+function norm(){S.days=S.days||{};S.habits=S.habits||[];S.set=Object.assign({wake:'07:00',ws:'08:00',we:'17:00',sleep:'23:00'},S.set);S.set.blocks=S.set.blocks||[{id:1,t:'کار',s:S.set.ws,e:S.set.we}];if(S.set.ls===undefined){S.set.ls='13:00';S.set.le='13:45'}if(S.set.ds===undefined){S.set.ds='20:00';S.set.de='20:45'}}norm();
+const SB_URL='https://kpgebvregolhpncwoskr.supabase.co',SB_KEY='sb_publishable_TvhQpWWTr1VpK_WsSMVYqQ_21E0raHN';
+let sy='local',tmr=null,SB=null,UID=null,inM=0;
+const SYT={ok:'☁️ روی سرور ذخیره شد',wait:'⏳ در حال ذخیره…',err:'⚠️ ذخیرهٔ سرور ناموفق بود؛ روی همین دستگاه ذخیره است',off:'📴 آفلاین؛ بعداً همگام می‌شود',local:'📴 وارد نشده‌ای؛ فقط روی همین دستگاه'};
+const hdr=()=>{const e=$('sy');if(e)e.innerHTML=SYT[sy]+(UID?' · <a href="#" data-a="logout">خروج</a>':' · <a href="#" data-a="login">ورود</a>')};
+const save=()=>{if(!inM)S.ts=Date.now();try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}if(UID&&!inM){sy='wait';hdr();clearTimeout(tmr);tmr=setTimeout(push,1200)}};
+async function push(){try{const r=await SB.from('planner_state').upsert({user_id:UID,ts:S.ts||0,s:JSON.stringify(S),updated_at:new Date().toISOString()});if(r.error)throw r.error;sy='ok'}catch(e){sy=navigator.onLine?'err':'off'}hdr()}
+async function pull(){const r=await SB.from('planner_state').select('ts,s').eq('user_id',UID).maybeSingle();if(r.error)throw r.error;const d=r.data;
+if(d){let o=null;try{o=JSON.parse(d.s)}catch(e){}if(o&&(+d.ts||0)>(S.ts||0)){S=o;norm();try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}sy='ok';render();return}}await push()}
+function showLogin(msg){let d=document.getElementById('lg');if(!d){d=document.createElement('div');d.id='lg';d.style.cssText='position:fixed;inset:0;background:var(--bg);z-index:20;display:flex;align-items:center;justify-content:center;padding:16px';document.body.appendChild(d)}
+d.innerHTML='<div class="card" style="width:100%;max-width:380px"><h2>📅 Daily Planer</h2><div class="note" style="margin-bottom:8px">برای ذخیره و همگام‌سازی اطلاعات وارد شو یا حساب بساز.</div><input id="lem" type="email" placeholder="ایمیل" style="direction:ltr"><input id="lpw" type="password" placeholder="رمز عبور (حداقل ۶ کاراکتر)" style="direction:ltr;margin:8px 0"><div class="row"><button class="p" data-a="lin">ورود</button><button data-a="lup">ساخت حساب</button></div><div class="note" id="lmsg" style="margin-top:8px">'+(msg||'')+'</div><button class="g" data-a="lskip">بدون حساب ادامه بده (فقط روی همین دستگاه)</button></div>'}
+const hideLogin=()=>{const d=document.getElementById('lg');if(d)d.remove()};
+async function doAuth(up){const em=$('lem').value.trim(),pw=$('lpw').value,m=$('lmsg');if(!SB){m.textContent='اتصال به سرور برقرار نیست.';return}if(!em||pw.length<6){m.textContent='ایمیل و رمز (حداقل ۶ کاراکتر) را وارد کن.';return}m.textContent='⏳ …';
+try{const r=up?await SB.auth.signUp({email:em,password:pw}):await SB.auth.signInWithPassword({email:em,password:pw});if(r.error)throw r.error;
+if(!r.data.session){m.textContent='ایمیل تأیید برایت ارسال شد؛ بعد از تأیید برگرد و وارد شو.';return}
+UID=r.data.session.user.id;hideLogin();await pull()}catch(e){m.textContent='خطا: '+(e.message||e)}hdr()}
+async function doLogout(){try{await SB.auth.signOut()}catch(e){}UID=null;sy='local';try{localStorage.removeItem(K)}catch(e){}S={};norm();render();showLogin()}
+async function initSync(){try{if(!window.supabase){hdr();return}SB=supabase.createClient(SB_URL,SB_KEY);const r=await SB.auth.getSession();if(r.data&&r.data.session){UID=r.data.session.user.id;await pull()}else showLogin()}catch(e){sy=navigator.onLine?'err':'off'}hdr()}
+let cur=new Date();cur.setHours(12);let tab='today',calM=jdate(cur).slice(0,2),open={},bk='';
+const $=id=>document.getElementById(id);
+const dayOf=k=>S.days[k]||{tasks:[]};
+function recSet(){const s=new Set();for(const k in S.days)if(S.days[k].tasks.length)s.add(k);S.habits.forEach(h=>{for(const k in h.log)if(h.log[k])s.add(k)});(S.arch||[]).forEach(k=>s.add(k));return s}
+function streak(h){const t=new Date();t.setHours(12);if(!h.log[key(t)])t.setDate(t.getDate()-1);let n=0;while(h.log[key(t)]){n++;t.setDate(t.getDate()-1)}return n}
+function tech(t){const q=TQ[t.top]||TQ['کارهای روزمره'];let s='<b>شروع:</b> '+q[0]+'<br><b>ادامه:</b> '+q[1];s+='<br><b>اگر–آنگاه:</b> اگر ساعت '+(t.start?ts(tm(t.start)):'شروع')+' شد، آنگاه همین کار را بدون تصمیم‌گیری شروع می‌کنم.';if(t.w>=4)s+='<br><b>اولویت بالا:</b> این کار را قبل از کارهای سبک‌تر انجام بده.';return s}
+// برنامه‌ریزی ساعت‌ها
+function plan(k,d){const day=dayOf(k),st=S.set;const work=day.work!=null?day.work:wdOf(d)!==6;const fixed=[],BL=day.blocks||(wdOf(d)==6?[]:st.blocks||[]),inB=t=>t.in&&BL.find(b=>String(b.id)==String(t.in));
+BL.forEach(b=>{if(tm(b.e)>tm(b.s))fixed.push({s:tm(b.s),e:tm(b.e),l:b.t,blk:1})});
+if(st.ns&&st.ne&&tm(st.ne)>tm(st.ns))fixed.push({s:tm(st.ns),e:tm(st.ne),l:'خواب بعد از ظهر',nap:1});
+[['ls','le','ناهار'],['ds','de','شام']].forEach(m=>{if(st[m[0]]&&st[m[1]]&&tm(st[m[1]])>tm(st[m[0]]))fixed.push({s:tm(st[m[0]]),e:tm(st[m[1]]),l:m[2],meal:1})});
+day.tasks.filter(t=>t.start&&!inB(t)).forEach(t=>fixed.push({s:tm(t.start),e:tm(t.start)+(t.dur||30),l:t.t,id:t.id}));
+S.habits.forEach(h=>{if(h.time)fixed.push({s:tm(h.time),e:tm(h.time)+h.min,l:'عادت: '+h.name,h:1})});
+fixed.sort((a,b)=>a.s-b.s);let gaps=[],c=tm(st.wake);const end=tm(st.sleep);
+fixed.forEach(f=>{if(f.s-c>=10)gaps.push({s:c,e:f.s});c=Math.max(c,f.e)});if(end-c>=10)gaps.push({s:c,e:end});
+const total=gaps.reduce((a,g)=>a+g.e-g.s,0);const free=gaps.map(g=>({...g}));const placed=[],miss=[];
+day.tasks.filter(t=>!t.start&&!t.done&&!inB(t)).sort((a,b)=>b.w-a.w).forEach(t=>{const dur=t.dur||30,g=free.find(g=>g.e-g.s>=dur);if(g){placed.push({s:g.s,e:g.s+dur,l:t.t,id:t.id,sug:1});g.s+=dur+5}else miss.push(t)});
+const cu_={};day.tasks.filter(t=>inB(t)&&!t.done).sort((a,b)=>b.w-a.w).forEach(t=>{const b=inB(t),du=t.dur||30,s0=t.start?tm(t.start):(cu_[b.id]!=null?cu_[b.id]:tm(b.s));if(t.start||s0+du<=tm(b.e)){placed.push({s:s0,e:s0+du,l:t.t,id:t.id,sug:t.start?0:1,inb:b.t});cu_[b.id]=s0+du+5}else miss.push(t)});
+const rest=free.filter(g=>g.e-g.s>=10).map(g=>({s:g.s,e:g.e,free:1}));
+return{work,all:[...fixed,...placed,...rest].sort((a,b)=>a.s-b.s),total,miss}}
+// انتقال کارها + آمار هفتگی
+const pk=k=>{const p=k.split('-');return new Date(+p[0],+p[1]-1,+p[2],12)};
+const wStart=d=>{const x=new Date(d);x.setHours(12);x.setDate(x.getDate()-wdOf(x));return x};
+function rollover(){const t=new Date();t.setHours(12);const k=key(t),d=S.days[k]=S.days[k]||{tasks:[]};if(d.rolled)return;d.rolled=true;
+for(let i=1;i<=7;i++){const p=new Date(t);p.setDate(p.getDate()-i);const pd=S.days[key(p)];if(!pd||!pd.tasks.length)continue;
+const c=pd.tasks.filter(x=>!x.done&&!x.moved&&x.w>=3).sort((a,b)=>b.w-a.w||a.id-b.id).slice(0,2);
+c.forEach((x,j)=>{x.moved=true;d.tasks.push({...x,id:Date.now()+j,done:false,moved:false,start:'',carried:(x.carried||0)+1})});break}save()}
+function wstats(ws){const o={days:0,tasks:0,done:0,ws:0,wd:0,hab:0,mp:0,md:0,top:{},imp:{},ov:{}};
+for(let i=0;i<7;i++){const d=new Date(ws);d.setDate(d.getDate()+i);const k=key(d),dd=S.days[k];let r=false;
+if(dd&&dd.tasks.length){r=true;dd.tasks.forEach(t=>{if(t.moved)return;const du=t.dur||30;o.tasks++;o.ws+=t.w;o.mp+=du;const a=o.top[t.top]=o.top[t.top]||[0,0],b=o.imp[t.w]=o.imp[t.w]||[0,0];a[0]++;b[0]++;if(t.done){o.done++;o.wd+=t.w;o.md+=du;a[1]++;b[1]++;const q=t.in?(t.inT||'فعالیت ثابت'):'زمان آزاد',v=o.ov[q]=o.ov[q]||[0,0];v[0]++;v[1]+=du}})}
+S.habits.forEach(h=>{if(h.log&&h.log[k]){o.hab++;r=true}});if(r)o.days++}return o}
+const mg=(p,o)=>{['days','tasks','done','ws','wd','hab','mp','md'].forEach(f=>p[f]=(p[f]||0)+(o[f]||0));['top','imp','ov'].forEach(g=>{p[g]=p[g]||{};for(const t in o[g]||{}){const a=p[g][t]=p[g][t]||[0,0];a[0]+=o[g][t][0];a[1]+=o[g][t][1]}})};
+function compact(){const ck=key(wStart(new Date())),old=new Set();
+for(const k in S.days)if(k<ck)old.add(key(wStart(pk(k))));
+S.habits.forEach(h=>{for(const k in h.log)if(k<ck)old.add(key(wStart(pk(k))))});
+if(!old.size)return;S.weeks=S.weeks||{};S.arch=S.arch||[];
+old.forEach(wk=>{const ws=pk(wk),o=wstats(ws),p=S.weeks[wk];
+if(p)mg(p,o);else S.weeks[wk]=o;
+for(let i=0;i<7;i++){const d=new Date(ws);d.setDate(d.getDate()+i);const k=key(d),dd=S.days[k];let r=!!(dd&&dd.tasks.length);
+S.habits.forEach(h=>{if(h.log&&h.log[k]){r=true;const hw=(S.hw=S.hw||{}),a=(hw[h.id]=hw[h.id]||{}),c=(a[wk]=a[wk]||{d:0,m:0});c.d++;c.m+=typeof h.log[k]=='number'?h.log[k]:h.min;delete h.log[k];if(h.pl)delete h.pl[k]}});if(r&&!S.arch.includes(k))S.arch.push(k);delete S.days[k]}});save()}
+function maintain(){inM=1;try{rollover();compact()}finally{inM=0}}
+function vStat(){const pct=(a,b)=>b?Math.round(a/b*100):0,bar=p=>'<div class="bar"><div style="width:'+p+'%"></div></div>';
+const lbl=ws=>{const e=new Date(ws);e.setDate(e.getDate()+6);const a=jdate(ws),b=jdate(e);return fa(a[2])+' '+MN[a[1]-1]+' تا '+fa(b[2])+' '+MN[b[1]-1]};
+const cs=wStart(new Date()),o=wstats(cs);
+let h='<div class="card"><h2>این هفته ('+lbl(cs)+')</h2><div>روزهای ثبت‌شده: <b>'+fa(o.days)+'</b> از ۷</div><div>کارهای انجام‌شده: <b>'+fa(o.done)+'</b> از '+fa(o.tasks)+' ('+fa(pct(o.done,o.tasks))+'٪)</div>'+bar(pct(o.done,o.tasks))+'<div>امتیاز وزنی (اهمیت): <b>'+fa(pct(o.wd,o.ws))+'٪</b></div>'+bar(pct(o.wd,o.ws))+'<div>دفعات انجام عادت‌ها: <b>'+fa(o.hab)+'</b></div>';
+const tp=Object.keys(o.top);if(tp.length)h+='<h3 style="margin-top:10px">به تفکیک موضوع</h3>'+tp.map(t=>'<div class="meta">'+t+': '+fa(o.top[t][1])+' از '+fa(o.top[t][0])+'</div>'+bar(pct(o.top[t][1],o.top[t][0]))).join('');
+h+='</div>';const W2=S.weeks||{},ks=Object.keys(W2).sort().reverse();
+h+='<div class="card"><h2>خلاصه هفته‌های گذشته</h2>'+(ks.map(k=>{const w=W2[k];return'<div class="slot"><span class="tm" style="flex-basis:130px">'+lbl(pk(k))+'</span><span>'+fa(w.days)+' روز · '+fa(w.done)+' از '+fa(w.tasks)+' کار ('+fa(pct(w.done,w.tasks))+'٪) · وزنی '+fa(pct(w.wd,w.ws))+'٪ · عادت '+fa(w.hab)+'</span></div>'}).join('')||'<div class="note">بعد از پایان این هفته، خلاصه‌اش اینجا ذخیره می‌شود و جزئیات روزها پاک می‌شود.</div>')+'</div>';
+const M={};ks.forEach(k=>{const j=jdate(pk(k)),mk=j[0]*100+j[1],w=W2[k],m=M[mk]=M[mk]||{y:j[0],m:j[1],n:0,days:0,tasks:0,done:0,ws:0,wd:0,hab:0};m.n++;['days','tasks','done','ws','wd','hab'].forEach(f=>m[f]+=w[f])});
+const mk=Object.keys(M).sort().reverse();
+if(mk.length)h+='<div class="card"><h2>خلاصه ماهانه (از روی هفته‌ها)</h2>'+mk.map(x=>{const m=M[x];return'<div class="slot"><span class="tm">'+MN[m.m-1]+' '+fa(m.y)+'</span><span>'+fa(m.n)+' هفته · '+fa(m.days)+' روز · '+fa(m.done)+' از '+fa(m.tasks)+' کار ('+fa(pct(m.done,m.tasks))+'٪) · عادت '+fa(m.hab)+'</span></div>'}).join('')+'</div>';
+h+=statCharts();return h}
+// نمایش
+function vCal(){const[jy,jm]=calM,n=jLen(jy,jm),f=wdOf(jToDate(jy,jm,1)),rec=recSet(),tk=key(new Date()),sk=key(cur);let mc=0;
+let g=WD.map(x=>'<div class="h">'+x.slice(0,1)+'</div>').join('')+'<span></span>'.repeat(f);
+for(let d=1;d<=n;d++){const dt=jToDate(jy,jm,d),kk=key(dt),r=rec.has(kk);if(r)mc++;g+='<button data-a="pick" data-k="'+kk+'"'+(wdOf(dt)==6?' style="color:var(--bad)"':'')+' class="'+(kk==tk?'t ':'')+(kk==sk?'s':'')+'">'+fa(d)+(r?'<i></i>':'')+'</button>'}
+return'<div class="nav"><button data-a="mon" data-n="1">›</button><b>'+MN[jm-1]+' '+fa(jy)+'</b><button data-a="mon" data-n="-1">‹</button></div><div class="card"><div class="cal">'+g+'</div></div><div class="card"><h2>صفحه‌های ثبت‌شده</h2><div>این ماه: <b>'+fa(mc)+'</b> از '+fa(n)+' روز</div><div>کل روزهای ثبت‌شده در حافظه برنامه: <b>'+fa(rec.size)+'</b></div><div class="note">روزی ثبت‌شده است که کاری یا عادتی برایش ثبت کرده باشی (نقطه سبز).</div></div>'}
+function vSet(){const s=S.set;const f=(l,n)=>'<div><label>'+l+'</label><input type="time" data-set="'+n+'" value="'+s[n]+'"></div>';
+return'<div class="card"><h2>تنظیمات روز</h2><div class="grid2">'+f('ساعت بیدار شدن','wake')+f('شروع کار','ws')+f('پایان کار','we')+f('ساعت خواب','sleep')+'</div><div class="note">جمعه‌ها به‌صورت پیش‌فرض روز کاری حساب نمی‌شود؛ در صفحه هر روز می‌توانی تغییر دهی.</div></div><div class="card"><h2>پشتیبان‌گیری</h2><div class="note" style="margin-bottom:6px">اطلاعات فقط روی همین مرورگر ذخیره می‌شود. برای انتقال، متن را کپی کن.</div><textarea id="bk" rows="4">'+esc(bk)+'</textarea><div class="row" style="margin-top:8px"><button data-a="exp">گرفتن پشتیبان</button><button data-a="imp">بازیابی</button></div></div>'}
+const EMI=['📚','🏠','💳','🧾','🎉','💼','🧠','🏃'],NE=['🤝','💪','🗣️','🎈','⚖️'],WI=['','⚪','🔵','🟢','🟠','🔴'],em=t=>EMI[TOP.indexOf(t)]||'📌';
+const dblk=k=>{const d=S.days[k]=S.days[k]||{tasks:[]};if(!d.blocks)d.blocks=(S.set.blocks||[]).map(b=>({...b}));return d.blocks};
+const dur=(a,b)=>{let d=tm(b)-tm(a);if(d<=0)d+=1440;return d},hm=m=>fa(Math.floor(m/60))+' ساعت'+(m%60?' و '+fa(m%60)+' دقیقه':'');
+const blkCard=(sc,L,title,note,extra)=>'<div class="card"><h2>'+title+'</h2><div class="note" style="margin-bottom:6px">'+note+'</div>'+L.map(b=>{const a=' data-sc="'+sc+'" data-id="'+b.id+'"';return'<div class="brow"><input data-bf="t"'+a+' value="'+esc(b.t)+'"><input type="time" data-bf="s"'+a+' value="'+b.s+'"><input type="time" data-bf="e"'+a+' value="'+b.e+'"><button class="g" data-a="bdel"'+a+'>✕</button></div>'}).join('')+'<div class="row"><button data-a="badd" data-sc="'+sc+'">➕ افزودن فعالیت</button>'+(extra||'')+'</div></div>';
+function sleepCard(){const s=S.set,n=dur(s.sleep,s.wake),np=s.ns&&s.ne&&tm(s.ne)>tm(s.ns)?tm(s.ne)-tm(s.ns):0,t=n+np;
+return'<div class="card"><h2>😴 خواب و بیداری</h2><div class="grid2"><div><label>☀️ بیدار شدن</label><input type="time" data-set="wake" value="'+s.wake+'"></div><div><label>🌙 خواب شب</label><input type="time" data-set="sleep" value="'+s.sleep+'"></div><div><label>😴 شروع خواب بعد از ظهر</label><input type="time" data-set="ns" value="'+(s.ns||'')+'"></div><div><label>پایان خواب بعد از ظهر</label><input type="time" data-set="ne" value="'+(s.ne||'')+'"></div></div><div class="note">شب: '+hm(n)+(np?' · بعد از ظهر: '+hm(np):'')+'</div><div class="note"><b>'+(t<420?'⚠️ ':'✓ ')+'مجموع خواب شبانه‌روز: '+hm(t)+'</b>'+(t<420?' — کمتر از ۷ ساعت':'')+'</div><div class="note">برای خاموش کردن خواب بعد از ظهر، ساعت‌هایش را پاک کن. این زمان از زمان آزاد کم می‌شود.</div></div>'}
+function vSet2(){S.set.blocks=S.set.blocks||[];const b=vSet(),i=b.indexOf('<div class="card"><h2>پشتیبان');return blkCard('def',S.set.blocks,'🔒 فعالیت‌های ثابت روزانه (پیش‌فرض)','این‌ها هر روز تکرار می‌شوند. برای تغییر فقط یک روز، از صفحه «امروز» استفاده کن.')+blkCard('day',((S.days[key(cur)]||{}).blocks||S.set.blocks),'📅 فعالیت‌های ثابت فقط برای '+dl(cur)+((S.days[key(cur)]||{}).blocks?' (تغییر‌یافته)':''),'برای کم و زیاد شدن زمان‌های یک روز خاص؛ روز را از تب «امروز» یا «تقویم» انتخاب کن.',(S.days[key(cur)]||{}).blocks?'<button data-a="breset">↩️ پیش‌فرض</button>':'')+sleepCard()+mealCard()+b.slice(i)}
+function vToday2(){const k=key(cur),day=dayOf(k),j=jdate(cur),isT=key(new Date())===k,pl=plan(k,cur),st=S.set,bl=day.blocks||(wdOf(cur)==6?[]:st.blocks||[]),T=id=>day.tasks.find(x=>x.id==id),dn=day.tasks.filter(t=>t.done).length;
+let h='<div class="nav"><button data-a="day" data-n="1">›</button><div style="text-align:center"><b>📅 '+WD[wdOf(cur)]+' '+fa(j[2])+' '+MN[j[1]-1]+' '+fa(j[0])+'</b><div class="note">'+(isT?'امروز':'<a href="#" data-a="now">برگشت به امروز</a>')+'</div></div><button data-a="day" data-n="-1">‹</button></div>';
+if(wdOf(cur)==6)h+='<div class="card" style="text-align:center">🎉 جمعه — روز تعطیل؛ فعالیت‌های ثابت امروز اعمال نمی‌شود.</div>';h+='<div class="card hero"><div class="stats"><div><b>'+fa(Math.floor(pl.total/60))+':'+fa(String(pl.total%60).padStart(2,'0'))+'</b><span class="note">⏳ زمان آزاد</span></div><div><b>'+fa(day.tasks.length-dn)+'</b><span class="note">📝 باقی‌مانده</span></div><div><b>'+fa(dn)+'/'+fa(day.tasks.length)+'</b><span class="note">✅ انجام‌شده</span></div></div></div>';
+h+='<div class="card"><h2>➕ کار جدید</h2><input id="tt" placeholder="عنوان کار"><div class="grid2" style="margin-top:8px"><div><label>📂 موضوع</label><select id="tp">'+TOP.map(x=>'<option value="'+x+'">'+em(x)+' '+x+'</option>').join('')+'</select></div><div><label>⚖️ وزن اهمیت</label><select id="tw">'+[5,4,3,2,1].map(i=>'<option value="'+i+'"'+(i==3?' selected':'')+'>'+WI[i]+' '+fa(i)+' – '+W[i]+'</option>').join('')+'</select></div><div><label>🎯 نیاز هیجانی (یانگ)</label><select id="tn">'+NEEDS.map((x,i)=>'<option value="'+i+'">'+NE[i]+' '+x+'</option>').join('')+'</select></div><div><label>⏱️ مدت (دقیقه)</label><input id="td" type="number" value="30" min="5" step="5"></div><div><label>🔗 انجام در فعالیت ثابت (همپوشانی)</label><select id="tb"><option value="">— زمان آزاد —</option>'+bl.map(b=>'<option value="'+b.id+'">'+esc(b.t)+'</option>').join('')+'</select></div></div><label>⏰ ساعت شروع (اختیاری)</label><div class="row"><input id="ts" type="time"><button class="p f0" data-a="add">افزودن</button></div></div>';
+const rows=pl.all.map(x=>{let c;const t=x.id&&!x.blk?T(x.id):null;
+if(x.free)c='<div class="fre">☕ زمان آزاد ('+fa(x.e-x.s)+' دقیقه)</div>';
+else if(t)c='<div class="ib w'+t.w+'"></div><div class="gr"><div class="tt">'+(t.done?'✅ ':'')+em(t.top)+' '+esc(t.t)+'</div><div class="note">'+WI[t.w]+' '+W[t.w]+' · '+esc(t.top)+(x.inb?' · 🔗 '+esc(x.inb):'')+(x.sug?' · <span class="badge">پیشنهاد</span>':'')+'</div><details><summary>🧭 روش شروع و ادامه</summary><div class="tech">'+tech(t)+'</div></details></div>'+(x.sug?'<button class="g" data-a="fix" data-id="'+t.id+'" data-s="'+x.s+'">📌</button>':'')+(t.done?'':'<button class="g" data-a="dn" data-id="'+t.id+'">✅</button>');
+else c='<div class="fxd">'+(x.h?'🌱 ':x.nap?'😴 ':x.meal?'🍽️ ':'🔒 ')+esc(x.l)+'</div>';
+return{s:x.s,h:'<div class="item"><div class="tmx">'+ts(x.s)+' – '+ts(x.e)+'</div>'+c+'</div>'}});
+rows.push({s:tm(st.wake)-1,h:'<div class="item"><div class="tmx">'+ts(tm(st.wake))+'</div><div class="fxd">☀️ بیدار شدن</div></div>'},{s:9999,h:'<div class="item"><div class="tmx">'+ts(tm(st.sleep))+'</div><div class="fxd">🌙 خواب شب</div></div>'});
+rows.sort((a,b)=>a.s-b.s);
+h+='<div class="card"><h2>🗓️ ساعت‌های امروز</h2>'+rows.map(r=>r.h).join('');
+if(pl.miss.length)h+='<div class="sug">⚠️ جا نشد: '+pl.miss.map(t=>esc(t.t)).join('، ')+' — مدت را کم کن یا ساعت‌های ثابت را تغییر بده.</div>';h+='</div>';
+h+='<div class="card"><h2>📝 کارهای امروز</h2>'+([...day.tasks].sort((a,b)=>b.w-a.w).map(t=>'<div class="item'+(t.done?' done':'')+'"><input type="checkbox" data-a="chk" data-id="'+t.id+'"'+(t.done?' checked':'')+' style="width:22px;min-height:0;margin-top:4px;accent-color:var(--ac)"><div class="ib w'+t.w+'"></div><div class="gr"><div class="tt">'+em(t.top)+' '+esc(t.t)+'</div><div class="note">'+WI[t.w]+' '+W[t.w]+(t.carried?' · <span class="badge">🔁 از روز قبل</span>':'')+' · '+fa(t.dur||30)+' دقیقه'+(t.start?' · ⏰ '+ts(tm(t.start)):'')+(t.in?' · 🔗 '+esc(t.inT||''):'')+'<br>'+NE[t.need||0]+' '+NEEDS[t.need||0]+'</div></div><button class="g" data-a="del" data-id="'+t.id+'">✕</button></div>').join('')||'<div class="note">🌱 هنوز کاری اضافه نکرده‌ای.</div>')+'</div>';
+if(day.tasks.length){const c=NEEDS.map((_,i)=>day.tasks.filter(t=>(t.need||0)==i).length),m=Math.max(...c,1);h+='<div class="card"><h2>🧠 توازن نیازهای هیجانی</h2>'+NEEDS.map((x,i)=>'<div class="note">'+NE[i]+' '+x+' ('+fa(c[i])+')</div><div class="bar"><div style="width:'+c[i]/m*100+'%"></div></div>').join('')+'</div>'}
+if(S.habits.length)h+='<div class="card"><h2>🌱 عادت‌های این روز</h2>'+S.habits.map(x=>'<div class="item"><input type="checkbox" data-a="hchk" data-id="'+x.id+'"'+(x.log[k]?' checked':'')+' style="width:22px;min-height:0;margin-top:4px;accent-color:var(--ac)"><div class="gr"><div class="tt">'+esc(x.name)+'</div><div class="note">⚓ بعد از «'+esc(x.cue)+'» · '+fa(x.min)+' دقیقه'+(x.time?' · '+ts(tm(x.time)):'')+(x.pts?' · 🎯 '+fa(x.pts)+' امتیاز':'')+'</div></div></div>').join('')+'</div>';
+return h}
+const TECH=[['قانون ۲ دقیقه','فقط ۲ دقیقهٔ اول را انجام بده؛ شروع، مانع اصلی اهمال‌کاری است.'],['اگر–آنگاه (نیت اجرایی)','از قبل بنویس «اگر X شد، آنگاه Y» تا تصمیم‌گیری لحظه‌ای حذف شود.'],['انباشت عادت','عادت را به رفتار ثابت روزانه بچسبان: «بعد از …».'],['پومودورو','۲۵ دقیقه تمرکز، ۵ دقیقه استراحت؛ فقط تا آخر تایمر.'],['ترکیب با لذت','کار دلخواه (پادکست، چای) را فقط همراه عادت انجام بده.'],['تعهد و پاسخ‌گویی','قولت را به یک نفر بگو یا برای شکست هزینه تعیین کن.'],['کاهش اصطکاک','وسایل را از شب قبل آماده بگذار تا شروع بی‌زحمت شود.'],['قورباغه','سخت‌ترین کار را اول روز، قبل از کارهای سبک‌تر انجام بده.'],['زنجیره بی‌وقفه','هرگز دو روز پشت‌سرهم جا نینداز.'],['WOOP (تضاد ذهنی)','آرزو، نتیجه، مانع و برنامهٔ «اگر مانع آمد…» را بنویس.'],['خودشفقتی بعد از لغزش','بعد از جا افتادن خودت را سرزنش نکن و فردا برگرد؛ سرزنش اهمال‌کاری را بیشتر می‌کند.'],['آینه حقیقت','صادقانه بنویس دقیقاً چه کاری، کی و کجا قرار است انجام شود و تا الان چقدر انجام داده‌ای؛ تصویر واقعی، نه آرزویی.'],['پینه‌دار کردن ذهن','عمداً با ناراحتی کوتاه‌مدت روبه‌رو شو تا ذهنت کم‌کم مقاوم شود؛ هر بار کمی بیشتر.'],['قانون ۴۰ درصد','وقتی ذهن می‌گوید «بس است»، هنوز حدود ۴۰٪ توانت باقی است؛ فقط کمی بیشتر ادامه بده.'],['شیشهٔ پیروزی‌ها','هر انجام موفق را یادداشت و نگه دار تا در لحظهٔ شک، شواهد واقعی داشته باشی.'],['پذیرفتن سختی','سختی بخشی از کار است؛ با آن نجنگ، بپذیرش و با همان ناراحتی شروع کن.'],['سخت ماندن','وقتی کار سخت شد، ۵ دقیقهٔ دیگر بمان؛ ماندن در سختی استقامت می‌سازد.'],['فرماندهی ذهن','فکر خودکار را ببین ولی فرمانش را نبر؛ خودت تصمیم بگیر و بگو «الان شروع می‌کنم».'],['تبدیل شدن به آدم متفاوت','به‌جای هدف، هویت را بنویس: «من کسی هستم که …»؛ هر بار انجام، یک رأی به آن هویت است.']];
+const TRAP=[['خودانضباطی ناکافی','شروع کوچک و ثبت پیشرفت'],['معیارهای سخت‌گیرانه','پذیرش نسخهٔ ۶۰ درصدی'],['شکست','بررسی شکست‌های واقعی و استثناها'],['استحقاق','تفکیک استراحت از فرار'],['نقص / شرم','تمایز بین رفتار و هویت']];
+const ST=['✅ ادامه دارد','⛔ قطع شده','🌱 جدید'],pct6=d=>Math.min(100,Math.round(d/6*100));
+function hdata(h){const cw=wStart(new Date()),ck=key(cw),pv=new Date(cw);pv.setDate(pv.getDate()-7);const pq=key(pv),w={},hw=(S.hw||{})[h.id]||{};
+for(const k in hw)w[k]={d:hw[k].d,m:hw[k].m};let cd=0,cm=0;
+for(let i=0;i<7;i++){const d=new Date(cw);d.setDate(d.getDate()+i);const v=h.log[key(d)];if(v){cd++;cm+=typeof v=='number'?v:h.min}}
+w[ck]={d:cd,m:cm};const ks=Object.keys(w).sort();let first=pk(ks[0]);if(h.cr){const c=wStart(pk(h.cr));if(c<first)first=c}
+const n=Math.max(1,Math.round((cw-first)/6048e5)+1);let sp=0,td=0,tn=0;ks.forEach(k=>{sp+=pct6(w[k].d);td+=w[k].d;tn+=w[k].m});
+const act=cd>0||!!(w[pq]&&w[pq].d>0),M={};
+ks.forEach(k=>{const j=jdate(pk(k)),mk=j[0]*100+j[1],m=M[mk]=M[mk]||{y:j[0],m:j[1],c:0,min:0};if(w[k].d>=6)m.c++;m.min+=w[k].m});
+return{n,cd,avg:Math.round(sp/n),td,tmin:tn,st:act?0:td>0?1:2,M}}
+function vHab2(){const H=S.habits,D=H.map(h=>({h,d:hdata(h)})),cnt=[0,1,2].map(i=>D.filter(x=>x.d.st==i).length),j0=jdate(new Date()),mk0=j0[0]*100+j0[1],bar=(p,c)=>'<div class="bar"><div style="width:'+p+'%'+(c?';background:'+c:'')+'"></div></div>';
+let s='<div class="card hero"><div class="stats"><div><b>'+fa(H.length)+'</b><span class="note">📌 عادت ثبت‌شده</span></div><div><b>'+fa(cnt[0])+'</b><span class="note">✅ ادامه‌دار</span></div><div><b>'+fa(cnt[1])+'</b><span class="note">⛔ قطع‌شده</span></div></div></div>';
+s+=engineCard()+thoughtCard();
+s+='<div class="card"><h2>🌱 ساخت عادت جدید</h2><div class="note" style="margin-bottom:8px">چرخه: نشانه ← میل ← پاسخ کوچک ← پاداش. ۶ روز تکرار در هفته = ۱۰۰٪ آن هفته.</div><input id="hn" placeholder="عادت (مثلاً: ورزش)"><div class="grid2" style="margin-top:8px"><div><label>⚓ نشانه: بعد از …</label><input id="hc" placeholder="نوشیدن چای"></div><div><label>🎁 پاداش</label><input id="hr" placeholder="پادکست"></div><div><label>⏰ ساعت پیشنهادی</label><input id="ht" type="time"></div><div><label>🎯 هدف نهایی (دقیقه)</label><input id="hg" type="number" value="10" min="2"></div><div><label>🧭 تکنیک ضد اهمال‌کاری</label><select id="hq">'+TECH.map((t,i)=>'<option value="'+i+'">'+t[0]+'</option>').join('')+'</select></div><div><label>📍 کجا؟</label><input id="hl" placeholder="مثلاً: میز مطالعه"></div><div><label>🪜 اولین قدم کوچک</label><input id="hs" placeholder="مثلاً: باز کردن کتاب"></div><div><label>🎯 امتیاز هر بار انجام (تعهد و پاسخ‌گویی)</label><select id="hv">'+PTS.map(v=>'<option value="'+v+'">'+(v?fa(v)+' امتیاز':'بدون امتیاز')+'</option>').join('')+'</select></div><div style="grid-column:1/-1" class="tech" id="hqd">'+TECH[0][1]+'</div></div><button class="p" data-a="hadd">ساخت عادت</button></div>';
+D.forEach(({h,d})=>{const p=pct6(d.cd),tt=TECH[h.tech],tr=TRAP[h.trap],mm=d.M[mk0]?Math.min(4,d.M[mk0].c)*25:0,dots=[];
+for(let i=6;i>=0;i--){const x=new Date();x.setDate(x.getDate()-i);dots.push('<span class="'+(h.log[key(x)]?'on':'')+'"></span>')}
+s+='<div class="card"><div class="row"><b>'+esc(h.name)+' <span class="badge">'+ST[d.st]+'</span></b><button class="g f0" data-a="hdel" data-id="'+h.id+'">'+(hdp==h.id?'⚠️ تأیید حذف':'حذف')+'</button></div><div class="note">⚓ بعد از «'+esc(h.cue)+'» ← '+fa(h.min)+' دقیقه ← 🎁 '+esc(h.rw||'—')+'</div><div style="margin-top:6px">این هفته: <b>'+fa(p)+'٪</b> ('+fa(d.cd)+' از ۶ روز) · وزن این ماه: <b>'+fa(mm)+'٪</b></div>'+bar(p,p>=100?'var(--ok)':'')+'<div class="dots">'+dots.join('')+'</div><div class="note">میانگین هفتگی: '+fa(d.avg)+'٪ · مجموع: '+hm(d.tmin)+'</div><label>🧭 تکنیک</label><select data-hf="tech" data-id="'+h.id+'"><option value="-1">— انتخاب کن —</option>'+TECH.map((t,i)=>'<option value="'+i+'"'+(h.tech===i?' selected':'')+'>'+t[0]+'</option>').join('')+'</select>'+(tt?'<div class="tech">'+tt[1]+'</div>':'')+'<label>🎯 امتیاز هر بار انجام (تعهد و پاسخ‌گویی)</label><select data-hf="pts" data-id="'+h.id+'">'+PTS.map(v=>'<option value="'+v+'"'+((h.pts||0)==v?' selected':'')+'>'+(v?fa(v)+' امتیاز ≈ '+fa(v)+' هزار تومان':'بدون امتیاز')+'</option>').join('')+'</select>'+(tr?'<div class="tech">🪤 '+tr[0]+': '+tr[1]+'</div>':'')+cheer(h,d)+stageHTML(h,d)+qaHTML(h,d)+(d.st==1?'<div class="sug">🔄 بازگشت: فقط ۲ دقیقه شروع کن و بدون سرزنش برگرد (خودشفقتی).</div>':'')+'</div>'});
+if(H.length){const mx=Math.max(1,...D.map(x=>x.d.tmin)),CL=['var(--ok)','var(--bad)','var(--mut)'];
+s+='<div class="card"><h2>⏱️ مقایسهٔ ساعت اختصاص‌یافته</h2>'+[0,1,2].map(i=>{const L=D.filter(x=>x.d.st==i).sort((a,b)=>b.d.tmin-a.d.tmin);return L.length?'<h3 style="margin-top:8px">'+ST[i]+' ('+fa(L.length)+') · '+hm(L.reduce((a,x)=>a+x.d.tmin,0))+'</h3>'+L.map(x=>'<div class="note">'+esc(x.h.name)+' — '+hm(x.d.tmin)+'</div>'+bar(Math.round(x.d.tmin/mx*100),CL[i])).join(''):''}).join('')+'</div>';
+const TS=TECH.map((t,i)=>{const L=D.filter(x=>x.h.tech===i);return{i,L,a:L.filter(x=>x.d.st==0).length,c:L.filter(x=>x.d.st==1).length,avg:L.length?Math.round(L.reduce((a,x)=>a+x.d.avg,0)/L.length):0,m:L.reduce((a,x)=>a+x.d.tmin,0)}}).filter(x=>x.L.length).sort((a,b)=>b.avg-a.avg);
+if(TS.length)s+='<div class="card"><h2>🧭 مقایسهٔ تکنیک‌ها</h2>'+TS.map((x,i)=>'<div><b>'+(i==0&&TS.length>1?'🏆 ':'')+TECH[x.i][0]+'</b> <span class="note">('+x.L.map(y=>esc(y.h.name)).join('، ')+')</span></div><div class="note">✅ '+fa(x.a)+' ادامه · ⛔ '+fa(x.c)+' قطع · میانگین '+fa(x.avg)+'٪ · '+hm(x.m)+'</div>'+bar(x.avg)).join('')+'<div class="note">تکنیک بالاتر یعنی عادت‌هایش در میانگین هفته‌ها پیشرفت بهتری داشته‌اند.</div></div>';
+const MS={};D.forEach(x=>{for(const k in x.d.M){const m=x.d.M[k],o=MS[k]=MS[k]||{y:m.y,m:m.m,r:[]};o.r.push({n:x.h.name,c:Math.min(4,m.c),min:m.min})}});
+s+='<div class="card"><h2>📆 گزارش ماهانه</h2><div class="note">هر ماه ۴ هفته؛ هر هفتهٔ کامل (۶ روز) = ۲۵٪.</div>'+Object.keys(MS).sort().reverse().map(k=>{const o=MS[k],av=Math.round(o.r.reduce((a,r)=>a+r.c*25,0)/o.r.length);return'<h3 style="margin-top:8px">'+MN[o.m-1]+' '+fa(o.y)+' · میانگین '+fa(av)+'٪</h3>'+o.r.map(r=>'<div class="note">'+esc(r.n)+' — '+fa(r.c)+' از ۴ هفته = '+fa(r.c*25)+'٪ · '+hm(r.min)+'</div>'+bar(r.c*25)).join('')}).join('')+'</div>'}
+return s}
+const PAL=['#0f766e','#d97706','#4b6fa5','#b91c1c','#7c3aed','#15803d','#be185d','#6b7078'];
+function svgLine(lb,sr){const w=320,p=26,mx=Math.max(1,...sr.flatMap(x=>x.v)),X=i=>p+i*(w-2*p)/Math.max(1,lb.length-1),Y=v=>116-(v/mx)*96;
+let g='<svg viewBox="0 0 320 140" width="100%" style="direction:ltr;display:block">';
+for(let i=0;i<=2;i++){const y=Y(mx*i/2);g+='<line x1="'+p+'" x2="'+(w-p)+'" y1="'+y+'" y2="'+y+'" style="stroke:var(--bd)"/><text x="2" y="'+(y+3)+'" font-size="9" style="fill:var(--mut)">'+fa(Math.round(mx*i/2*10)/10)+'</text>'}
+lb.forEach((l,i)=>g+='<text x="'+X(i)+'" y="134" font-size="9" text-anchor="middle" style="fill:var(--mut)">'+l+'</text>');
+sr.forEach(x=>{g+='<polyline fill="none" stroke-width="2" style="stroke:'+x.c+'" points="'+x.v.map((v,i)=>X(i)+','+Y(v)).join(' ')+'"/>'+x.v.map((v,i)=>'<circle cx="'+X(i)+'" cy="'+Y(v)+'" r="3" style="fill:'+x.c+'"/>').join('')});
+return g+'</svg><div class="note">'+sr.map(x=>'<span style="color:'+x.c+'">●</span> '+x.n).join(' &nbsp; ')+'</div>'}
+function svgPie(it){const t=it.reduce((a,x)=>a+x.v,0);if(!t)return'<div class="note">هنوز کاری انجام نشده است.</div>';let a0=-Math.PI/2,g='<svg viewBox="-60 -60 120 120" width="150" style="display:block;margin:auto">';
+it.forEach((x,i)=>{const a1=a0+x.v/t*2*Math.PI,l=a1-a0>Math.PI?1:0,q=(a,r)=>Math.cos(a)*r+','+Math.sin(a)*r;
+g+=it.length==1?'<circle r="55" style="fill:'+PAL[0]+'"/>':'<path d="M0,0 L'+q(a0,55)+' A55,55 0 '+l+' 1 '+q(a1,55)+' Z" style="fill:'+PAL[i%8]+'"/>';a0=a1});
+return g+'<circle r="26" style="fill:var(--card)"/></svg>'+it.map((x,i)=>'<div class="note"><span style="color:'+PAL[i%8]+'">●</span> '+esc(x.l)+' — '+fa(x.c)+' کار · '+hm(x.v)+' ('+fa(Math.round(x.v/t*100))+'٪)</div>').join('')}
+function statCharts(){const cs=wStart(new Date()),W2=S.weeks||{},lb=[],pl=[],dn=[],r1=x=>Math.round(x/6)/10;
+for(let i=0;i<7;i++){const d=new Date(cs);d.setDate(d.getDate()+i);const t=(S.days[key(d)]||{tasks:[]}).tasks.filter(x=>!x.moved);lb.push(WD[i].slice(0,2));pl.push(r1(t.reduce((a,x)=>a+(x.dur||30),0)));dn.push(r1(t.filter(x=>x.done).reduce((a,x)=>a+(x.dur||30),0)))}
+const cw=wstats(cs),A={};mg(A,cw);Object.values(W2).forEach(w=>mg(A,w));
+let h='<div class="card"><h2>📈 ساعت‌های این هفته (کار)</h2>'+svgLine(lb,[{n:'برنامه‌ریزی‌شده',c:PAL[1],v:pl},{n:'انجام‌شده',c:PAL[0],v:dn}]);
+const wk=Object.keys(W2).sort().slice(-7);
+if(wk.length){const L=wk.map(k=>{const j=jdate(pk(k));return fa(j[2])+'/'+fa(j[1])}).concat('اکنون');h+='<h3 style="margin-top:10px">روند هفته‌ها (ساعت)</h3>'+svgLine(L,[{n:'برنامه‌ریزی‌شده',c:PAL[1],v:wk.map(k=>r1(W2[k].mp||0)).concat(r1(cw.mp))},{n:'انجام‌شده',c:PAL[0],v:wk.map(k=>r1(W2[k].md||0)).concat(r1(cw.md))}])}
+h+='</div>';
+const db=(d,t,m)=>'<div class="bar"><div style="width:'+t/m*100+'%;background:var(--acs)"><div style="height:100%;width:'+(t?d/t*100:0)+'%;background:var(--ac)"></div></div></div>';
+const im=[5,4,3,2,1],mi=Math.max(1,...im.map(i=>(A.imp[i]||[0])[0])),tp=Object.keys(A.top),mt=Math.max(1,...tp.map(t=>A.top[t][0]));
+h+='<div class="card"><h2>🎯 کارهای انجام‌شده (کل / انجام‌شده)</h2><h3>بر اساس اهمیت</h3>'+im.map(i=>{const v=A.imp[i]||[0,0];return'<div class="note">'+WI[i]+' '+W[i]+' — '+fa(v[1])+' از '+fa(v[0])+'</div>'+db(v[1],v[0],mi)}).join('')+'<h3 style="margin-top:10px">بر اساس موضوع</h3>'+(tp.map(t=>'<div class="note">'+em(t)+' '+t+' — '+fa(A.top[t][1])+' از '+fa(A.top[t][0])+'</div>'+db(A.top[t][1],A.top[t][0],mt)).join('')||'<div class="note">داده‌ای نیست.</div>')+'<div class="note">شامل این هفته و خلاصهٔ هفته‌های قبل.</div></div>';
+h+='<div class="card"><h2>🥧 تایم‌های همپوشان با فعالیت‌های ثابت</h2><div class="note" style="margin-bottom:6px">کارهای انجام‌شده درون هر فعالیت ثابت، در برابر زمان آزاد.</div>'+svgPie(Object.keys(A.ov).map(q=>({l:q,c:A.ov[q][0],v:A.ov[q][1]})).filter(x=>x.v>0).sort((a,b)=>b.v-a.v))+'</div>';
+return h}
+const TRT=[[0,13,6],[0,9,15],[14,10,8],[1,17,7],[10,18,14]],TRR=['فکر نمونه: «این بار هم نمی‌توانم ادامه دهم». شروع را کوچک کن و هر انجام را ثبت کن.','فکر نمونه: «اگر کامل نباشد، ارزشی ندارد». نسخهٔ ۶۰ درصدی را بپذیر؛ ناقص انجام‌شده بهتر از انجام‌نشده است.','فکر نمونه: «همیشه شکست می‌خورم». شکست‌های واقعی و استثناها (روزهایی که انجام دادی) را مرور کن.','فکر نمونه: «الان حق استراحت دارم، بعداً جبران می‌کنم». استراحت برنامه‌ریزی‌شده را از فرار جدا کن.','فکر نمونه: «من آدم تنبلی هستم». رفتار امروز را از هویتت جدا کن.'],COP=['فرار (اجتناب)','تسلیم','حمله / جبران افراطی'],MODES=[['کودک بی‌انضباط','خواهان لذت فوری','۲ دقیقه شروع کن.'],['والد سخت‌گیر','خودانتقادی شدید و فشار بیش از حد','کار را نصف کن.'],['محافظ اجتنابی','فرار از کار برای جلوگیری از احساس بد','فقط کوچک‌ترین قدم را بردار و بعد تصمیم بگیر.']],SM=[0,1,2,0,1];
+function schema(h,d){const[q1,q2,q3,q4,q5,cp,q6]=h.qa.a,ev=h.time&&tm(h.time)>=1230?.4:0,lo=d.avg<30?.4:0;
+const s=[1.5*q1+(cp==0?1.2:0)+(q6==0?.8:0)+(q4==3||q5==3?.8:0)+ev+lo,2*q6+.7*q3+(cp==2?1.5:0)+(q2==0&&q1>0?.6:0)+(q1==1?.4:0),1.5*(2-q2)+(cp==1?1.5:0)+(q3>0?.6:0)+(q4==0||q5==0?.7:0)+lo,(q5==3?2:0)+(q3==0?1.2:0)+(cp==0?.8:0)+(q6==0?.4:0)+(q1==0?.6:0),(q3==2?1.2:0)+(q2==0?1.2:0)+(cp==1?1:0)+(q4==0||q5==0?.8:0)+(q1==2?.3:0)].map(x=>x+.2),t=s.reduce((x,y)=>x+y,0);return s.map((x,i)=>({i,p:Math.round(x/t*100)})).sort((x,y)=>y.p-x.p)}
+const yn=(id,l)=>'<label style="margin-top:8px">'+l+'</label><select id="'+id+'"><option value="0">خیر</option><option value="1" selected>تا حدی</option><option value="2">بله</option></select>',nd=(id,l)=>'<label style="margin-top:8px">'+l+'</label><select id="'+id+'"><option value="-1">هیچ‌کدام / مطمئن نیستم</option>'+NEEDS.map((x,i)=>'<option value="'+i+'">'+x+'</option>').join('')+'</select>';
+function qaHTML(h,d){const id=h.id;if(!stopped(h,d))return'';
+if(h.qa){const r=schema(h,d),t=r[0],u=r[1],cf=d.n>=4?'بالا':d.n>=2?'متوسط':'کم';
+return'<div class="sug"><b>🔎 نتیجهٔ تحلیل:</b> محتمل‌ترین تله: <b>'+TRAP[t.i][0]+'</b> ('+fa(t.p)+'٪ تطابق) · احتمال دوم: '+TRAP[u.i][0]+' ('+fa(u.p)+'٪)<br>'+TRR[t.i]+'<br>🎭 حالت محتمل: '+MODES[SM[t.i]][0]+' ('+MODES[SM[t.i]][1]+') — پیشنهاد: '+MODES[SM[t.i]][2]+'<br>شیوهٔ مقابله: '+COP[h.qa.a[5]]+(h.time?' · ساعت '+ts(tm(h.time)):'')+' · میانگین هفتگی '+fa(d.avg)+'٪ · '+fa(d.cd)+' از ۶ روز این هفته<br>🧭 تکنیک پیشنهادی: '+TRT[t.i].map(x=>'<button data-a="happ" data-id="'+id+'" data-t="'+x+'">'+TECH[x][0]+'</button>').join(' ')+'<div class="note" style="margin-top:6px">اطمینان تحلیل: '+cf+'. این برآورد بر پایهٔ پاسخ‌ها و ثبت‌های توست، نه تشخیص بالینی؛ با ثبت هفته‌های بیشتر دقیق‌تر می‌شود.</div><button class="g" data-a="qre" data-id="'+id+'">↻ پاسخ دوباره</button></div>'}
+return'<details open class="sug"><summary>❓ این عادت پایدار نیست؛ علتش را پیدا کنیم (۶ سؤال)</summary>'+yn('q1_'+id,'۱) برای انجامش دشواری ذهنی (شروع‌نکردن، حوصله‌نداشتن) داری؟')+yn('q2_'+id,'۲) بعد از انجامش احساس ارزشمندی می‌کنی؟')+yn('q3_'+id,'۳) بعد از رها کردنش عذاب وجدان داری ولی باز هم از سر نمی‌گیری؟')+nd('q4_'+id,'۴) با تکرار این عادت چه نیازی را رفع می‌کنی؟')+nd('q5_'+id,'۵) با رها کردنش چه نیازی را تقویت می‌کنی؟')+'<label style="margin-top:8px">شیوهٔ مقابله هنگام رها کردن</label><select id="cp_'+id+'">'+COP.map((x,i)=>'<option value="'+i+'">'+x+'</option>').join('')+'</select>'+yn('q6_'+id,'۶) کارهایی که نوشته‌ای بیشتر از ظرفیت ذهنی‌ات هستند؟')+'<button class="p" style="margin-top:8px" data-a="qa" data-id="'+id+'">تحلیل کن</button></details>'}
+const CATS=['تعمیر ماشین','خرید روزمره','خرید وسایل شخصی','خرید دوره آموزشی','نگهداری ماشین (روغن و بنزین)','پرداخت قبض همراه','پرداخت بابت هزینه‌های منزل','سایر'],CEM=['🔧','🛒','🛍️','🎓','⛽','📱','🏠','📌'];
+let fm=jdate(new Date()).slice(0,2);
+const fin=()=>S.fin=S.fin||{inc:[],exp:[]},pn=v=>+String(v).replace(/[۰-۹]/g,c=>FA.indexOf(c)).replace(/[^\d]/g,'')||0,money=n=>fa(String(n).replace(/\B(?=(\d{3})+(?!\d))/g,'٬')),jmk=k=>{const j=jdate(pk(k));return j[0]*100+j[1]},jd_=k=>{const j=jdate(pk(k));return fa(j[2])+' '+MN[j[1]-1]},dl=d=>{const j=jdate(d);return fa(j[2])+' '+MN[j[1]-1]};
+function words(n){if(!n)return'صفر تومان';const O=['','یک','دو','سه','چهار','پنج','شش','هفت','هشت','نه'],T=['ده','یازده','دوازده','سیزده','چهارده','پانزده','شانزده','هفده','هجده','نوزده'],D=['','','بیست','سی','چهل','پنجاه','شصت','هفتاد','هشتاد','نود'],C=['','یکصد','دویست','سیصد','چهارصد','پانصد','ششصد','هفتصد','هشتصد','نهصد'],SC=['','هزار','میلیون','میلیارد','تریلیون'];
+const g=x=>{const a=[],h=Math.floor(x/100),r=x%100;if(h)a.push(C[h]);if(r){if(r<10)a.push(O[r]);else if(r<20)a.push(T[r-10]);else{a.push(D[Math.floor(r/10)]);if(r%10)a.push(O[r%10])}}return a.join(' و ')};
+const p=[];let i=0;while(n>0&&i<SC.length){const x=n%1000;if(x)p.unshift((i==1&&x==1?'':g(x)+' ')+SC[i]);n=Math.floor(n/1000);i++}return p.join(' و ').trim()+' تومان'}
+const amtIn=(id,v)=>'<input id="'+id+'" data-w="'+id+'w" inputmode="numeric" placeholder="مبلغ به تومان" value="'+(v||'')+'"><div class="note" id="'+id+'w" style="min-height:20px;color:var(--ac)"></div>';
+const dF=p=>{const j=jdate(new Date());return'<div class="grid2" style="grid-template-columns:1fr 1.4fr 1fr"><input id="'+p+'y" value="'+fa(j[0])+'" inputmode="numeric"><select id="'+p+'m">'+MN.map((m,i)=>'<option value="'+(i+1)+'"'+(i+1==j[1]?' selected':'')+'>'+m+'</option>').join('')+'</select><input id="'+p+'d" value="'+fa(j[2])+'" inputmode="numeric"></div>'};
+const rD=p=>{const y=pn($(p+'y').value)||1405,m=+$(p+'m').value;return key(jToDate(y,m,Math.min(pn($(p+'d').value)||1,jLen(y,m))))};
+function autoPay(t,k){if(!(t.top==TOP[2]||/پرداخت|قبض/.test(t.t)))return;const x=t.t,c=/همراه|موبایل|اینترنت|شارژ/.test(x)?5:/تعمیر/.test(x)?0:/بنزین|روغن|ماشین/.test(x)?4:/منزل|خانه|اجاره|برق|گاز|آب/.test(x)?6:/دوره|کلاس/.test(x)?3:7;fin().exp.push({id:Date.now()+1,a:0,c,d:k,n:x,tid:t.id})}
+document.addEventListener('input',e=>{const t=e.target,w=t.dataset&&t.dataset.w;if(w){const n=pn(t.value);$(w).textContent=n?words(n):''}});
+function vFin(){const F=fin(),y=fm[0],m=fm[1],mk=y*100+m,I=F.inc.filter(x=>jmk(x.d)==mk),E=F.exp.filter(x=>x.a&&jmk(x.d)==mk),P=F.exp.filter(x=>!x.a),ti=I.reduce((a,x)=>a+x.a,0),te=E.reduce((a,x)=>a+x.a,0),rem=ti-te;
+let h='<div class="nav"><button data-a="fmon" data-n="1">›</button><b>💰 '+MN[m-1]+' '+fa(y)+'</b><button data-a="fmon" data-n="-1">‹</button></div>';
+h+='<div class="card hero" style="text-align:center"><div class="note">💵 پول باقیمانده این ماه</div><div style="font-size:32px;font-weight:700;line-height:1.5;color:'+(rem<0?'var(--bad)':'var(--ok)')+'">'+(rem<0?'−':'')+money(Math.abs(rem))+' <span style="font-size:15px">تومان</span></div><div class="note">'+(rem<0?'منفی: ':'')+words(Math.abs(rem))+'</div><div class="note">ورودی '+money(ti)+' − هزینه '+money(te)+'</div>'+fundBox()+'</div>';
+if(P.length)h+='<div class="card"><h2>⏳ پرداخت‌های ثبت‌شده در برنامه</h2><div class="note">این کارها را در تب امروز نوشته‌ای؛ مبلغشان را وارد کن.</div>'+P.map(x=>'<div class="item" style="flex-wrap:wrap"><div class="gr"><b>'+esc(x.n)+'</b> <span class="note">'+jd_(x.d)+'</span><select data-fx="'+x.id+'">'+CATS.map((c,i)=>'<option value="'+i+'"'+(x.c==i?' selected':'')+'>'+CEM[i]+' '+c+'</option>').join('')+'</select>'+amtIn('pa_'+x.id)+'</div><button class="p f0" data-a="fpay" data-id="'+x.id+'">ثبت مبلغ</button><button class="g" data-a="fdel" data-k="exp" data-id="'+x.id+'">✕</button></div>').join('')+'</div>';
+h+='<div class="card"><h2>📥 ورودی ماهانه و تاریخ دریافت</h2>'+amtIn('ia')+'<label>تاریخ دریافت وجه</label>'+dF('id')+'<input id="inn" placeholder="توضیح (مثلاً حقوق)" style="margin-bottom:8px"><button class="p" data-a="finadd">ثبت ورودی</button>'+I.map(x=>'<div class="item"><div class="gr"><b>'+money(x.a)+' تومان</b> <span class="note">'+jd_(x.d)+(x.n?' · '+esc(x.n):'')+'</span><div class="note">'+words(x.a)+'</div></div><button class="g" data-a="fdel" data-k="inc" data-id="'+x.id+'">✕</button></div>').join('')+'</div>';
+h+='<div class="card"><h2>💸 هزینه جدید</h2>'+amtIn('ea')+'<label>موضوع</label><select id="ec">'+CATS.map((c,i)=>'<option value="'+i+'">'+CEM[i]+' '+c+'</option>').join('')+'</select><label style="margin-top:8px">تاریخ</label>'+dF('ed')+'<input id="enn" placeholder="توضیح (اختیاری)" style="margin-bottom:8px"><button class="p" data-a="fexadd">ثبت هزینه</button>'+E.sort((a,b)=>b.d<a.d?-1:1).map(x=>'<div class="item"><div class="gr"><b>'+CEM[x.c]+' '+money(x.a)+' تومان</b> <span class="note">'+jd_(x.d)+'</span><div class="note">'+CATS[x.c]+(x.n?' · '+esc(x.n):'')+'</div></div><button class="g" data-a="fdel" data-k="exp" data-id="'+x.id+'">✕</button></div>').join('')+'</div>';
+const by=CATS.map((c,i)=>({c,i,v:E.filter(x=>x.c==i).reduce((a,x)=>a+x.a,0)})).filter(x=>x.v).sort((a,b)=>b.v-a.v);
+h+='<div class="card"><h2>📊 هزینه به تفکیک موضوع</h2>'+(by.map(x=>{const pc=Math.round(x.v/te*100);return'<div class="note">'+CEM[x.i]+' '+x.c+' — '+money(x.v)+' تومان ('+fa(pc)+'٪)</div><div class="bar"><div style="width:'+pc+'%;background:'+PAL[x.i%8]+'"></div></div>'}).join('')||'<div class="note">این ماه هزینه‌ای ثبت نشده است.</div>')+'</div>';
+return h}
+const PTS=[0,10,20,30,40,50,60,70,80,90,100],wkl=k=>{const a=pk(k),e=new Date(a);e.setDate(e.getDate()+6);return dl(a)+' تا '+dl(e)};
+function fundTog(h,k,on){const pl=h.pl=h.pl||{},wk=key(wStart(pk(k))),F=S.fund=S.fund||{},w=F[wk]=F[wk]||{p:0,n:0};
+if(on&&!pl[k]&&h.pts>0){pl[k]=h.pts;w.p+=h.pts;w.n++}else if(!on&&pl[k]){w.p=Math.max(0,w.p-pl[k]);w.n=Math.max(0,w.n-1);delete pl[k]}}
+function fundBox(){const F=S.fund||{},cw=F[key(wStart(new Date()))]||{p:0,n:0},ks=Object.keys(F).sort().reverse().slice(0,8),tp=Object.values(F).reduce((a,x)=>a+x.p,0);
+return'<div style="margin-top:12px;padding:10px;border-radius:12px;background:var(--card);border:1px dashed var(--ac)"><div class="note">🏺 صندوق انگیزه (این هفته)</div><div style="font-size:22px;font-weight:700">'+fa(cw.p)+' امتیاز</div><div>💎 '+fa(cw.p)+' هزار تومان را به حساب انگیزه انتقال بده <span class="note">('+fa(cw.n)+' فعالیت)</span></div><div class="note">کل صندوق: '+fa(tp)+' هزار تومان ('+words(tp*1000)+') · از موجودی کم نمی‌شود و فقط سنجش پیشرفت عادت‌هاست.</div>'+(ks.length?'<details><summary class="note">امتیاز هفته‌ها</summary>'+ks.map(k=>'<div class="note">'+wkl(k)+' — '+fa(F[k].p)+' امتیاز · '+fa(F[k].n)+' فعالیت</div>').join('')+'</details>':'')+'</div>'}
+let advMsg='';
+const ST4=['آماده‌سازی','شروع','ادامه','تثبیت'],TS4=[[11],[13,0],[12,15,17],[14,16,18]],TX4=['کار، زمان و مکان را مشخص کن و صادقانه ببین الان کجایی.','آستانهٔ شروع را پایین بیاور: کوچک‌ترین قدم.','مقاومت و پایداری بساز؛ سختی را بپذیر.','عمل را به هویت تبدیل کن.'],SAFENOTE='اگر افسردگی شدید، اضطراب مداوم یا افکار آسیب به خود داری، ابتدا با یک متخصص سلامت روان صحبت کن. این ابزار جایگزین درمان حرفه‌ای نیست.',SAFE='<div class="sug" style="border:1px solid var(--bad)"><b>💛 حرفت را جدی می‌گیرم.</b><br>الان مهم‌ترین کار، امنیت توست. با یک نفر مورد اعتماد صحبت کن و در خطر فوری با اورژانس (۱۱۵) یا اورژانس اجتماعی (۱۲۳) تماس بگیر. می‌توانی به یک متخصص سلامت روان هم مراجعه کنی. تکنیک‌های این برنامه جای درمان حرفه‌ای را نمی‌گیرند.</div>';
+function kwS(t){const R=[[4,/تنبل|بی.?عرضه|به درد نخور|احمق/],[2,/همیشه شکست|شکست|هرگز موفق|نمی.?شود/],[1,/کامل|ارزشی ندارد|بی.?نقص/],[3,/حق (دارم|استراحت)|جبران|بعداً|فردا/],[0,/نمی.?(توانم|تونم)|ادامه/]];for(const[i,r]of R)if(r.test(t))return i;return-1}
+function advise(md,si){const V=['میل به لذت فوری قوی است و این کاملاً طبیعی است.','به نظر می‌رسد داری به خودت فشار زیادی می‌آوری.','فرار از کار برای دور شدن از احساس بد قابل‌درک است.','سخت است که وقتی مقاومت داری باز هم شروع کنی.'],A=['۲ دقیقه شروع کن؛ بعدش اگر خواستی ادامه نده.','کار را نصف کن و نسخهٔ ۶۰ درصدی را بپذیر.','فقط کوچک‌ترین قدم را بردار و بعد تصمیم بگیر.','فقط ۵ دقیقه را امتحان کنیم؛ اگر بعدش نخواستی ادامه بدهی، اشکالی ندارد.'],Q=['کدام بخش این کار برای تو سخت‌تر است؟','اگر دوستی مهربان جای تو بود، چه چیزی به او می‌گفتی؟','چه احساسی را می‌خواهی با نکردنش دور کنی؟','کدام کار را می‌توانی امروز شروع کنی؟'],c=si>=0?TRAP[si]:null;
+return'<div class="sug"><b>💬</b> '+V[md]+'<br>'+A[md]+(c?'<br><span class="note">الگوی احتمالی: '+c[0]+' — اصلاح: '+c[1]+'</span>':'')+'<br><b>'+Q[md]+'</b></div>'}
+function engineCard(){return'<div class="card"><details><summary><b>🔄 موتور عادت‌سازی</b> — چرخه، مراحل و قوانین</summary><div class="tech"><b>محرک ← میل ← عمل کوچک ← ثبت و پاداش</b><br>عادت وقتی شکل می‌گیرد که محرک ثابت، عمل کوچک و پاداش فوری باشد. برای هر عادت بنویس: چه زمانی؟ کجا؟ اولین قدم چیست؟</div>'+ST4.map((x,i)=>'<div class="note" style="margin-top:6px"><b>'+x+':</b> '+TX4[i]+' ← '+TS4[i].map(t=>TECH[t][0]).join('، ')+'</div>').join('')+'<div class="note" style="margin-top:8px">• با کوچک‌ترین نسخه شروع کن (مثلاً ۵ دقیقه مطالعه).<br>• در هر لحظه فقط یک عادت جدید فعال باشد.<br>• اگر دو روز پشت سر هم انجام نشد، نسخهٔ سبک‌تر پیشنهاد می‌شود؛ سرزنشی در کار نیست.</div></details></div>'}
+function thoughtCard(){const L=(S.thoughts||[]).slice(0,5);return'<div class="card"><h2>🧠 ثبت فکر در لحظهٔ مقاومت</h2>'+(advMsg=='SAFE'?SAFE:advMsg)+'<label>📍 موقعیت: الان کجا هستم و چه کاری باید انجام دهم؟</label><input id="th1"><label style="margin-top:8px">💭 فکر خودکار (مثلاً «خسته‌ام»، «فردا بهتر می‌شود»)</label><input id="th2"><label style="margin-top:8px">⚖️ واقعیت و پاسخ (مثلاً «۵ دقیقه می‌توانم شروع کنم»)</label><input id="th3"><label style="margin-top:8px">🎭 الان کدام حالت هدایتم می‌کند؟</label><select id="th4">'+MODES.map((m,i)=>'<option value="'+i+'">'+m[0]+' — '+m[1]+'</option>').join('')+'<option value="3">نمی‌دانم</option></select><button class="p" style="margin-top:8px" data-a="thsave">ثبت و پیشنهاد</button><div class="note" style="margin-top:6px">'+SAFENOTE+'</div>'+(L.length?'<details><summary class="note">فکرهای اخیر</summary>'+L.map(x=>'<div class="note">'+jd_(x.d)+' · «'+esc(x.t)+'»'+(x.r?' ← '+esc(x.r):'')+(x.sc>=0?' · '+TRAP[x.sc][0]:'')+'</div>').join('')+'</details>':'')+'</div>'}
+function stageHTML(h,d){const sg=d.td==0?0:(h.min>=h.goal&&d.avg>=66&&d.n>=3)?3:d.td<6?1:2,t=new Date(),k=n=>key(new Date(t.getTime()-n*864e5)),miss=!h.log[k(0)]&&!h.log[k(1)]&&!h.log[k(2)]&&((h.cr&&h.cr<=k(2))||d.td>0),lite=Math.max(1,Math.ceil(h.min/2));
+return'<div class="tech" style="margin-top:8px"><b>🔁 محرک:</b> بعد از «'+esc(h.cue)+'»'+(h.time?' ساعت '+ts(tm(h.time)):'')+(h.loc?' در '+esc(h.loc):'')+' ← <b>عمل کوچک:</b> '+esc(h.fs||fa(h.min)+' دقیقه')+' ← <b>پاداش:</b> '+esc(h.rw||'—')+'</div><div style="margin-top:6px">'+ST4.map((x,i)=>'<span class="badge'+(i==sg?' w3':'')+'">'+x+'</span>').join('')+'</div><div class="note">'+TX4[sg]+'</div><details><summary class="note">تکنیک‌های مرحلهٔ «'+ST4[sg]+'»</summary>'+TS4[sg].map(x=>'<div class="note" style="margin-top:4px"><b>'+TECH[x][0]+':</b> '+TECH[x][1]+' <button class="g" data-a="happ" data-id="'+h.id+'" data-t="'+x+'">انتخاب</button></div>').join('')+'</details>'+(miss&&h.min>1?'<div class="sug">🌤️ دو روز پشت سر هم انجام نشد؛ اشکالی ندارد. نسخهٔ سبک‌تر: '+fa(lite)+' دقیقه. <button data-a="hlite" data-id="'+h.id+'">اعمال</button></div>':'')}
+function weekCard(t){const cw=wStart(new Date()),ck=key(cw),o=wstats(cw),fri=wdOf(new Date())==6,pc=(a,b)=>b?Math.round(a/b*100):0,ks=new Set();
+for(let i=0;i<7;i++){const d=new Date(cw);d.setDate(d.getDate()+i);ks.add(key(d))}
+const ex=fin().exp.filter(x=>x.a&&ks.has(x.d)),inc=fin().inc.filter(x=>ks.has(x.d)),te=ex.reduce((a,x)=>a+x.a,0),ti=inc.reduce((a,x)=>a+x.a,0),f=(S.fund||{})[ck]||{p:0,n:0};
+const hd=S.habits.map(h=>({h,d:hdata(h)})),ha=hd.length?Math.round(hd.reduce((a,x)=>a+pct6(x.d.cd),0)/hd.length):0;let r='';
+if(t!='fin'){r+='<div>✅ کارها: <b>'+fa(o.done)+'</b> از '+fa(o.tasks)+' ('+fa(pc(o.done,o.tasks))+'٪) · ⏱️ '+hm(o.md)+' · ⭐ وزنی '+fa(pc(o.wd,o.ws))+'٪</div>';
+if(hd.length)r+='<div>🌱 عادت‌ها: میانگین پیشرفت هفته <b>'+fa(ha)+'٪</b></div>'+(t=='hab'?hd.map(x=>'<div class="note">'+esc(x.h.name)+' — '+fa(pct6(x.d.cd))+'٪ ('+fa(x.d.cd)+' از ۶ روز)</div>').join(''):'')}
+r+='<div>🏺 صندوق انگیزه: <b>'+fa(f.p)+'</b> امتیاز ('+fa(f.p)+' هزار تومان)</div>';
+if(t!='hab')r+='<div>💸 هزینهٔ هفته: <b>'+money(te)+'</b> تومان'+(t=='fin'?' · 📥 ورودی هفته: '+money(ti)+' تومان':'')+'</div>';
+return'<details class="card"'+(fri?' open':'')+'><summary><b>📊 خلاصهٔ این هفته'+(fri?' — مرور آخر هفته 🎉':'')+'</b></summary>'+r+'</details>'}
+function mealCard(){const s=S.set,f=(l,n)=>'<div><label>'+l+'</label><input type="time" data-set="'+n+'" value="'+(s[n]||'')+'"></div>';
+return'<div class="card"><h2>🍽️ ناهار و شام</h2><div class="grid2">'+f('شروع ناهار','ls')+f('پایان ناهار','le')+f('شروع شام','ds')+f('پایان شام','de')+'</div><div class="note">این بازه‌ها از زمان آزاد کم می‌شوند و در ساعت‌های امروز دیده می‌شوند. برای حذف، ساعت‌ها را پاک کن.</div></div>'}
+let hdp=0;const RX=/خواب|ناهار|شام|شغل|محل کار|کار ثابت/;
+function trackRec(t,k){if(!t.start||t.in||t.top==TOP[5]||RX.test(t.t))return;const R=S.rec=S.rec||{},kk=t.t.trim()+'@'+t.start,r=R[kk]=R[kk]||{id:Date.now(),t:t.t.trim(),st:t.start,dur:t.dur||30,days:[]};if(!r.days.includes(k))r.days.push(k);r.days=r.days.slice(-30)}
+function stopped(h,d){const T=new Date(),k=n=>key(new Date(T.getTime()-n*864e5));return!h.log[k(0)]&&!h.log[k(1)]&&!h.log[k(2)]&&((h.cr&&h.cr<=k(2))||d.td>0)}
+function cheer(h,d){const T=new Date(),k=n=>key(new Date(T.getTime()-n*864e5)),done=!!h.log[k(0)],y=!!h.log[k(1)];let m;
+if(done)m='✅ امروز انجامش دادی'+(d.td>1?' (تا حالا '+fa(d.td)+' روز)':'')+'؛ همین یعنی ادامه دادن. کوچک بودنش اهمیتی ندارد.';
+else if(d.td==0)m='🌱 شروع می‌تواند خیلی کوچک باشد؛ فقط '+fa(h.min)+' دقیقه. بعدش هر وقت خواستی تمامش کن.';
+else if(!y&&!h.log[k(2)])m='💛 چند روز جا افتاد و این به معنی شکست نیست. امروز فقط نسخهٔ خیلی کوچکش را انجام بده.';
+else if(!y)m='🙂 دیروز جا افتاد؛ قانون ساده: دو بار پشت سر هم جا نینداز.';
+else m='👍 دیروز انجام دادی؛ امروز هم با یک قدم کوچک ادامه بده.';
+return'<div class="note" style="margin-top:6px">'+m+'</div>'}
+function habBanner(){const n=S.habits.length,full=n>=10,bd=S.habits.find(h=>{const d=hdata(h);return d.td>0&&d.td<6&&!stopped(h,d)});
+let o='<div class="card"><b>📌 '+fa(n)+' از ۱۰ عادت</b>'+(full?'<div class="sug">به سقف ۱۰ عادت رسیده‌ای؛ برای عادت جدید، یکی از قبلی‌ها را حذف کن.</div>':bd?'<div class="note">🌤️ عادت «'+esc(bd.name)+'» هنوز در حال ساخته شدن است؛ اضافه‌کردن همزمان چند عادت جدید توصیه نمی‌شود، ولی ممنوع هم نیست.</div>':'')+'</div>';
+const C=Object.values(S.rec||{}).filter(r=>!r.conv&&r.days.length>=3&&!S.habits.some(h=>h.name==r.t));
+if(C.length&&!full)o+='<div class="card"><h2>🔁 کارهای تکراری با ساعت مشخص</h2><div class="note">این کارها چند روز در یک ساعت ثبت شده‌اند؛ می‌توانی عادتشان کنی.</div>'+C.map(r=>'<div class="item"><div class="gr"><b>'+esc(r.t)+'</b><div class="note">ساعت '+ts(tm(r.st))+' · '+fa(r.days.length)+' روز ثبت شده</div></div><button class="p f0" data-a="rec2h" data-id="'+r.id+'">تبدیل به عادت</button></div>').join('')+'</div>';
+return o}
+function vHabW(){return habBanner()+vHab2()}
+function render(){maintain();const v={today:vToday2,cal:vCal,hab:vHabW,set:vSet2,stat:vStat,fin:vFin}[tab]();$('app').innerHTML='<div style="text-align:center;font-weight:700;direction:ltr">📅 Daily Planer</div><div id="sy" class="note" style="text-align:center;margin-bottom:8px"></div>'+(tab=='today'||tab=='hab'||tab=='fin'?weekCard(tab):'')+v;hdr();
+$('nav').innerHTML=[['today','امروز'],['cal','تقویم'],['hab','عادت‌ها'],['fin','هزینه'],['stat','آمار'],['set','تنظیمات']].map(x=>'<button data-a="tab" data-t="'+x[0]+'" class="'+(tab==x[0]?'on':'')+'">'+x[1]+(x[0]=='hab'&&S.habits.length?' ('+fa(S.habits.length)+')':'')+'</button>').join('')}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a,k=key(cur);if(b.tagName=='A')e.preventDefault();if(a=='lin'||a=='lup'){doAuth(a=='lup');return}if(a=='lskip'){hideLogin();return}if(a=='logout'){doLogout();return}if(a=='login'){showLogin();return}
+if(a=='tab'){advMsg='';tab=b.dataset.t;if(tab=='cal')calM=jdate(cur).slice(0,2)}
+else if(a=='day')cur.setDate(cur.getDate()+ +b.dataset.n);
+else if(a=='now'){cur=new Date();cur.setHours(12)}
+else if(a=='mon'){let[y,m]=calM;m+=+b.dataset.n;if(m>12){m=1;y++}if(m<1){m=12;y--}calM=[y,m]}
+else if(a=='pick'){const p=b.dataset.k.split('-');cur=new Date(+p[0],+p[1]-1,+p[2],12);tab='today'}
+else if(a=='add'){const t=$('tt').value.trim();if(!t){$('tt').focus();return}const d=S.days[k]=S.days[k]||{tasks:[]};d.tasks.push({id:Date.now(),t,top:$('tp').value,w:+$('tw').value,need:+$('tn').value,dur:+$('td').value||30,start:$('ts').value,in:$('tb').value,inT:$('tb').selectedOptions[0].textContent,done:false});autoPay(d.tasks[d.tasks.length-1],k);trackRec(d.tasks[d.tasks.length-1],k)}
+else if(a=='chk'){const t=dayOf(k).tasks.find(x=>x.id==b.dataset.id);t.done=b.checked}
+else if(a=='del'){S.days[k].tasks=S.days[k].tasks.filter(x=>x.id!=b.dataset.id);fin().exp=fin().exp.filter(e=>!(e.tid==b.dataset.id&&!e.a))}
+else if(a=='tech'){open[b.dataset.id]=!open[b.dataset.id]}
+else if(a=='fix'){const t=S.days[k].tasks.find(x=>x.id==b.dataset.id);t.start=ts(+b.dataset.s).replace(/[۰-۹]/g,c=>FA.indexOf(c));trackRec(t,k)}
+else if(a=='work'){const d=S.days[k]=S.days[k]||{tasks:[]};d.work=b.checked}
+else if(a=='hadd'){const n=$('hn').value.trim();if(!n){$('hn').focus();return}if(S.habits.length>=10)return;const g=+$('hg').value||10;S.habits.push({loc:$('hl').value.trim(),fs:$('hs').value.trim(),id:Date.now(),name:n,cue:$('hc').value.trim()||'بیدار شدن',rw:$('hr').value.trim(),time:$('ht').value,goal:g,min:Math.min(2,g),log:{},tech:+$('hq').value,trap:-1,pts:+$('hv').value,cr:key(new Date())})}
+else if(a=='hchk'){const h=S.habits.find(x=>x.id==b.dataset.id);h.log[k]=b.checked?h.min:false;fundTog(h,k,b.checked);if(b.checked){const s=streak(h);if(k==key(new Date())&&s%7==0&&h.min<h.goal)h.min=Math.min(h.goal,Math.ceil(h.min*1.5))}}
+else if(a=='hdel'){if(hdp==b.dataset.id){S.habits=S.habits.filter(x=>x.id!=b.dataset.id);hdp=0}else hdp=b.dataset.id}
+else if(a=='dn'){S.days[k].tasks.find(x=>x.id==b.dataset.id).done=true}
+else if(a=='breset'){if(S.days[k])delete S.days[k].blocks}
+else if(a=='badd'||a=='bdel'){const L=b.dataset.sc=='day'?dblk(k):S.set.blocks;if(a=='badd')L.push({id:Date.now(),t:'فعالیت جدید',s:'12:00',e:'13:00'});else{const i=L.findIndex(x=>x.id==b.dataset.id);if(i>=0)L.splice(i,1)}}
+else if(a=='qa'){const h=S.habits.find(x=>x.id==b.dataset.id),g=n=>+$(n+'_'+h.id).value;h.qa={a:[g('q1'),g('q2'),g('q3'),g('q4'),g('q5'),g('cp'),g('q6')],dt:key(new Date())};h.trap=schema(h,hdata(h))[0].i}
+else if(a=='hlite'){const h=S.habits.find(x=>x.id==b.dataset.id);h.min=Math.max(1,Math.ceil(h.min/2))}
+else if(a=='thsave'){const sv=$('th1').value.trim(),th=$('th2').value.trim(),re=$('th3').value.trim(),md=+$('th4').value;if(!th){$('th2').focus();return}
+if(/خودکشی|آسیب به خود|خودم را بکش|بمیرم|نمی.?خواهم زنده/.test(sv+' '+th+' '+re))advMsg='SAFE';else{const si=kwS(th);advMsg=advise(md,si);(S.thoughts=S.thoughts||[]).unshift({id:Date.now(),d:key(new Date()),s:sv,t:th,r:re,m:md,sc:si});S.thoughts=S.thoughts.slice(0,30)}}
+else if(a=='qre'){delete S.habits.find(x=>x.id==b.dataset.id).qa}
+else if(a=='happ'){S.habits.find(x=>x.id==b.dataset.id).tech=+b.dataset.t}
+else if(a=='fmon'){let[y,m]=fm;m+=+b.dataset.n;if(m>12){m=1;y++}if(m<1){m=12;y--}fm=[y,m]}
+else if(a=='finadd'){const x=pn($('ia').value);if(!x){$('ia').focus();return}fin().inc.push({id:Date.now(),a:x,d:rD('id'),n:$('inn').value.trim()})}
+else if(a=='fexadd'){const x=pn($('ea').value);if(!x){$('ea').focus();return}fin().exp.push({id:Date.now(),a:x,c:+$('ec').value,d:rD('ed'),n:$('enn').value.trim()})}
+else if(a=='fpay'){const e=fin().exp.find(x=>x.id==b.dataset.id),x=pn($('pa_'+b.dataset.id).value);if(!x){$('pa_'+b.dataset.id).focus();return}e.a=x}
+else if(a=='fdel'){fin()[b.dataset.k]=fin()[b.dataset.k].filter(x=>x.id!=b.dataset.id)}
+else if(a=='rec2h'){const r=Object.values(S.rec||{}).find(x=>x.id==b.dataset.id);if(r&&S.habits.length<10){const g=Math.max(2,Math.min(r.dur||10,60));S.habits.push({id:Date.now(),name:r.t,cue:'رسیدن ساعت '+r.st,rw:'',time:r.st,goal:g,min:Math.min(2,g),log:{},tech:0,trap:-1,pts:0,cr:key(new Date()),loc:'',fs:''});r.conv=1}}
+else if(a=='exp'){bk=JSON.stringify(S)}
+else if(a=='imp'){try{const o=JSON.parse($('bk').value);if(o&&o.days){S=o;S.habits=S.habits||[];S.set=Object.assign({wake:'07:00',ws:'08:00',we:'17:00',sleep:'23:00'},S.set);bk=''}}catch(x){alert('متن پشتیبان معتبر نیست')}}
+save();render()});
+document.addEventListener('change',e=>{const t=e.target,n=t.dataset.set;if(t.id=='hq'){$('hqd').textContent=TECH[t.value][1];return}if(t.dataset.fx){const e=fin().exp.find(x=>x.id==t.dataset.fx);if(e){e.c=+t.value;save()}return}if(n){S.set[n]=t.value;save();render();return}if(t.dataset.hf){const h=S.habits.find(x=>x.id==t.dataset.id);if(h){h[t.dataset.hf]=+t.value;save();render()}return}if(t.dataset.bf){const L=t.dataset.sc=='day'?dblk(key(cur)):S.set.blocks,x=L.find(y=>y.id==t.dataset.id);if(x){x[t.dataset.bf]=t.value;save();render()}}});
+render();
+initSync();
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
